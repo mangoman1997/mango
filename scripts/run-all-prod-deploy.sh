@@ -1,51 +1,43 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# One-shot: load env, scrub (B-path), push to main, and guide deployment verification
+# One-file deploy launcher: load env, scrub, push, verify (A path) - simplified to single file for double-click deployment
 WORKSPACE_DIR="/home/mangopi/.openclaw/workspace"
 ENV_FILE="$WORKSPACE_DIR/secrets/.env"
+SCRIPT_PUSH="$WORKSPACE_DIR/scripts/push-prod.sh"
+SCRIPT_SCRUB="$WORKSPACE_DIR/scripts/b_scrub_run.sh"
+RUN_ALL_FLAG="1" # placeholder to ensure run
 
-# Step 0: Load secrets if available
+# 1) Load secrets if exists
 if [ -f "$ENV_FILE" ]; then
   set -a
   source "$ENV_FILE"
   set +a
-else
-  echo "WARNING: $ENV_FILE not found. Will attempt to use existing environment variables." >&2
 fi
 
-# Step 1: Basic checks for tokens
+# 2) Basic checks for tokens
 if [ -z "${GITHUB_TOKEN:-}" ]; then
   echo "ERROR: GITHUB_TOKEN is not set in environment" >&2
+  echo "Please create/prepare secrets/.env with GITHUB_TOKEN" >&2
   exit 1
 fi
-if [ -z "${VERCEL_TOKEN:-}" ]; then
-  echo "NOTE: VERCEL_TOKEN not set. Will rely on CI/CD to deploy to production." >&2
-fi
 
-# Step 2: Run B-path scrub (optional: ensure secrets are not in history)
-if [ -x "$WORKSPACE_DIR/scripts/b_scrub_run.sh" ]; then
-  echo "Running B-path scrub to remove secrets from latest commits..."
-  "$WORKSPACE_DIR/scripts/b_scrub_run.sh"
+# 3) Run scrub (best-effort; if script missing, skip gracefully)
+if [ -x "$SCRIPT_SCRUB" ]; then
+  "$SCRIPT_SCRUB"
 else
-  echo "WARN: b_scrub_run.sh not found or not executable; skipping scrub."
+  echo "WARNING: scrub script not found or not executable; continuing without scrub."
 fi
 
-# Step 3: Push to main using token (delegate to push-prod.sh which loads env securely)
-if [ -x "$WORKSPACE_DIR/scripts/push-prod.sh" ]; then
-  echo "Pushing to main with token-based authentication..."
-  "$WORKSPACE_DIR/scripts/push-prod.sh" || true
+# 4) Push to main using existing push-prod.sh (which loads env from secrets)
+if [ -x "$SCRIPT_PUSH" ]; then
+  "$SCRIPT_PUSH"
 else
   echo "ERROR: push-prod.sh not found or not executable" >&2
   exit 1
 fi
 
-# Step 4: Guidance for deployment verification in CI/CD (no automatic actions here)
- echo "\nNext steps:"
- echo "1) Go to GitHub Actions > Prod Deploy (Vercel) to monitor the deployment."
- echo "2) Open Vercel dashboard to confirm prod deployment and Production URL." 
- echo "3) Run the quick healthcheck against the prod URL (health endpoint / if available)."
- echo "4) Test webhook at /webhook/egpay with valid/invalid signatures to verify prod behavior."
- echo "If anything fails, you can use the rollback.sh script to trigger a rollback (see scripts/rollback.sh)."
+# 5) Verification guidance (no automatic external calls) - just hints
+echo "Deployment trigger completed. Please check GitHub Actions Prod Deploy (Vercel) and Vercel Production URL." 
 
- echo "Run-all-prod-deploy.sh completed."
+exit 0

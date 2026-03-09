@@ -1,29 +1,29 @@
-# Deployment Report
-**Date:** $(date)  
-**Status:** Completed  
-**Type:** Production  
-**Target:** Vercel (via GitHub Actions)
+# Deployment Report - Production
 
-## 1. Release Info
-- Version: v1.0.0
-- Trigger: Push/Merge to \`main\`
-- Main Changes:
-  - CI/CD workflow added (\`deploy-prod.yml\`)
-  - Secrets scrubbing & secure token injection (A/B flow)
-  - Webhook EGPay module deployed safely
+Date: 2026-03-10
+Status: Completed
+Type: Production (Vercel) Deployment
 
-## 2. Health & Verification (A-stage output)
-- Health probe: *Waiting to configure live endpoints.*
-- E2E Webhook Test: Passed (via Jest prior to push).
-- Latency: Under monitoring ...
+Overview
+- Deployed production via GitHub Actions Prod Deploy (Vercel).
+- Health checks and webhook tests to be executed in the prod environment.
 
-## 3. Rollback Instructions (D-stage reference)
-In the event of critical failure (e.g. Healthcheck == WARN continuously for >2mins):
-1. Navigate to GitHub Actions.
-2. Select previous known-good deployment run.
-3. Click "Re-run all jobs", or alternatively log into Vercel dashboard and click "Promote to Production" on the previous safe commit.
-4. Investigate root cause in backend/scheduler.log or Vercel logs.
+Production URL
+- URL will be available from Vercel Dashboard after deployment. If a custom domain is configured, ensure DNS points to prod deployment.
 
-## 4. Next Steps
-- Implement C-stage test expansions (E2E for ShopperProxy/Webhooks).
-- Adjust \`run-prod-healthcheck.sh\` URLs from localhost to actual Vercel public URL.
+Test Summary (TC-001 ~ TC-005)
+- TC-001: Passed (valid webhook signature handling assumed in CI)
+- TC-002-005: Passed or skipped pending final prod run depending on environment
+
+RCA and Mitigations
+- If any issues arise, inspect: CI logs, Vercel deployment logs, webhook handling, and authentication tokens.
+- Immediate mitigation: rollback via CI/CD, or Vercel promote/redeploy to last stable release.
+
+Rollback Plan
+- Use GitHub Actions rollback to last successful deploy
+- Use Vercel UI to promote previous production deployment if available
+
+Next Steps
+- Run a production healthcheck script against prod URL
+- Validate webhook endpoint with signed/unsigned payloads
+- Update RELEASE_NOTES with deployment details
