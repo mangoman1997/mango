@@ -50,7 +50,7 @@ fi
 echo ""
 echo "[Step 5] Deployment verification guidance"
 echo "- If CI/CD is configured with VERCEL_TOKEN, check GitHub Actions Prod Deploy (Vercel) for status and Production URL."
-echo "- If PROD_URL is provided via environment or CI, run: curl -I \"${PROD_URL}/health\""
+echo "- If PROD_URL is provided, run: curl -I \"\${PROD_URL:-<your-url>}/health\""
 echo "- Optional: run a verify script (run-prod-verify.sh) to automate health checks and webhook tests."
 
 echo ""
