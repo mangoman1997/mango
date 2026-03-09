@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: 18
+          node-version: '18'
 
       - name: Install dependencies
         run: npm ci
@@ -24,11 +24,12 @@ jobs:
       - name: Run tests
         run: npm test
 
-      - name: Deploy to Production (vercel)
+      - name: Deploy to Production (Vercel)
         if: success()
         env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERcel_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           echo "Starting production deployment via Vercel CLI..."
-          npx vercel deploy --prod --token "$VERCEL_TOKEN" --confirm
-          echo "Production deployment completed (VerceI)."
+          npx vercel deploy --prod --token "$VERcel_TOKEN" --confirm
+          echo "Deployment to production completed."

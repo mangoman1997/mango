@@ -32,7 +32,7 @@ fi
 # 3) Run B-path scrub (if available)
 if [ -x "$SCRIPT_SCRUB" ]; then
   echo "[Step 3] Running B-path scrub (local, minimal history scrub)"
-  "$SCRIPT_SCRUB" || true
+  "$SCRIPT_SCRUB" || echo "Note: scrub encountered non-fatal issues; continuing"  # continue on errors
 else
   echo "WARN: Scrub script not found or not executable. Skipping scrub." >&2
 fi
@@ -40,7 +40,7 @@ fi
 # 4) Push to main using push-prod.sh
 if [ -x "$SCRIPT_PUSH" ]; then
   echo "[Step 4] Pushing to main via token-based authentication..."
-  "$SCRIPT_PUSH" || echo "Push script exited with non-zero status (check logs)."
+  "$SCRIPT_PUSH" || echo "Push script exited with non-zero status (check logs)." 
 else
   echo "ERROR: push-prod.sh not found or not executable" >&2
   exit 1
@@ -50,7 +50,7 @@ fi
 echo ""
 echo "[Step 5] Deployment verification guidance"
 echo "- If CI/CD is configured with VERCEL_TOKEN, check GitHub Actions Prod Deploy (Vercel) for status and Production URL."
-echo "- If PROD_URL is provided, run: curl -I \"\${PROD_URL:-<your-url>}/health\""
+echo "- If PROD_URL is provided via environment or CI, run: curl -I \"${PROD_URL:-<your-url>}/health\""
 echo "- Optional: run a verify script (run-prod-verify.sh) to automate health checks and webhook tests."
 
 echo ""
