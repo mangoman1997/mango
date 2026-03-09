@@ -27,9 +27,9 @@ jobs:
       - name: Deploy to Production (Vercel)
         if: success()
         env:
-          VERcel_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.ITHUB_TOKEN }}
         run: |
           echo "Starting production deployment via Vercel CLI..."
-          npx vercel deploy --prod --token "$VERcel_TOKEN" --confirm
+          npx vercel deploy --prod --token "$VERCEL_TOKEN" --confirm
           echo "Deployment to production completed."
