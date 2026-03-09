@@ -1,17 +1,17 @@
-# Webhook EGPay (ECPay) lokal
+# Webhook EGPay (ECPay) Local Deployment Guide
 
-설명:
-- Node.js + Express 기반의 수신 엔드포인트 예제
-- 시그니처 검증 로직 포함(필요시 활성화)
-- 배포 및 로컬 테스트 방법 제공
+Overview:
+- Local webhook receiver (Node.js + Express) with optional signature verification.
+- How to securely inject token for production deployment via CI/CD Secrets or local env files.
 
-설정
-- ECPAY_WEBHOOK_SECRET 환경변수 설정
+Local setup:
+- Ensure Node.js 18+
+- Create secrets/.env with GITHUB_TOKEN if using local push script
 
-실행:
-- npm init -y
-- npm install express
-- node api/webhook-egpay.js
+Deployment:
+- For local push: run push-prod.sh (it reads GITHUB_TOKEN from env/.env)
+- In CI/CD: configure Secrets and rely on deploy-prod.yml to perform prod deploy (replace placeholder with real cloud CLI steps)
 
-테스트
-- curl 예제 포함
+Security:
+- Do not commit secrets; use environment variables and GitHub Secrets
+- Ensure only approved individuals can access secrets
