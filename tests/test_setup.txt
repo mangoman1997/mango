@@ -1,0 +1,4 @@
+# Test setup for Jest
+- Install: npm init -y; npm i --save-dev jest supertest
+- Script: add test script in package.json: "test": "jest"
+- Run: npm test

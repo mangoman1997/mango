@@ -1,29 +1,37 @@
-name: Deploy ShopperProxy Day3
+name: Prod Deployment
+
 on:
   push:
-    branches: [ main, rc ]
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
 jobs:
-  build-deploy:
+  test-and-deploy:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
     steps:
-      - uses: actions/checkout@v3
-      - name: Setup Node
-        uses: actions/setup-node@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
         with:
-          node-version: 22
-      - name: Install dependencies
-        run: npm install
-      - name: Run tests (TC-001..TC-005)
-        run: |
-          echo Running TC tests...
-      - name: Build Frontend
-        run: |
-          npm run build || true
-      - name: Deploy to Vercel
+          node-version: 18
+
+      - name: Install Dependencies
+        run: npm ci
+
+      - name: Run Jest Tests (TC-001 ~ TC-005)
+        run: npm test
+
+      - name: Deploy to Vercel (Production)
+        if: success()
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
         run: |
-          npx vercel --prod --confirm
+          npx vercel pull --yes --environment=production --token=$VERCEL_TOKEN
+          npx vercel build --prod --token=$VERCEL_TOKEN
+          npx vercel deploy --prebuilt --prod --token=$VERCEL_TOKEN
