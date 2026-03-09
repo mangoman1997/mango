@@ -40,7 +40,7 @@ fi
 # 4) Push to main using push-prod.sh
 if [ -x "$SCRIPT_PUSH" ]; then
   echo "[Step 4] Pushing to main via token-based authentication..."
-  "$SCRIPT_PUSH" || echo "Push script exited with non-zero status (check logs)." 
+  cd "$WORKSPACE_DIR" && "$SCRIPT_PUSH" || echo "Push script exited with non-zero status (check logs)." 
 else
   echo "ERROR: push-prod.sh not found or not executable" >&2
   exit 1
