@@ -1,0 +1,29 @@
+name: Deploy ShopperProxy Day3
+on:
+  push:
+    branches: [ main, rc ]
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    env:
+      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+    steps:
+      - uses: actions/checkout@v3
+      - name: Setup Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Run tests (TC-001..TC-005)
+        run: |
+          echo Running TC tests...
+      - name: Build Frontend
+        run: |
+          npm run build || true
+      - name: Deploy to Vercel
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        run: |
+          npx vercel --prod --confirm

@@ -1,0 +1,4 @@
+# Secrets Template (DO NOT STORE SENSITIVE VALUES HERE)
+- GITHUB_TOKEN_NAME: <name>
+- VERCEL_TOKEN_NAME: <name>
+- ADDITIONAL_SECRETS: <path or name>
