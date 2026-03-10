@@ -17,22 +17,32 @@ else
   echo "[Step 1] Secrets file not found: $ENV_FILE (using current env vars)" >&2
 fi
 
-# 2) Verify required tokens
+# 2) Verify and clean required tokens
 echo "[Step 2] Verifying required tokens..."
-if [ -z "${GITHUB_TOKEN:-}" ]; then
-  echo "ERROR: GITHUB_TOKEN is not set." >&2
+
+# Clean GITHUB_TOKEN
+RAW_TOKEN="${GITHUB_TOKEN:-${ITHUB_TOKEN:-}}"
+TOKEN="$(echo -n "$RAW_TOKEN" | tr -d '\r\n ')"
+export GITHUB_TOKEN="$TOKEN" # Export cleaned version for child scripts
+
+if [ -z "$TOKEN" ]; then
+  echo "ERROR: GitHub token not found (GITHUB_TOKEN or ITHUB_TOKEN)" >&2
   exit 1
 fi
+
+# Clean VERCEL_TOKEN if present
 if [ -n "${VERCEL_TOKEN:-}" ]; then
-  echo "INFO: Found VERCEL_TOKEN (for CI/CD deployments)."
+  CLEAN_VERCEL="$(echo -n "$VERCEL_TOKEN" | tr -d '\r\n ')"
+  export VERCEL_TOKEN="$CLEAN_VERCEL"
+  echo "INFO: Found VERCEL_TOKEN (cleaned for deployment)."
 else
-  echo "WARNING: VERCEL_TOKEN not set. CI/CD deployment may be required." >&2
+  echo "WARNING: VERCEL_TOKEN not set. CI/CD deployment may fail if required." >&2
 fi
 
 # 3) Run B-path scrub (if available)
 if [ -x "$SCRIPT_SCRUB" ]; then
   echo "[Step 3] Running B-path scrub (local, minimal history scrub)"
-  "$SCRIPT_SCRUB" || echo "Note: scrub encountered non-fatal issues; continuing"  # continue on errors
+  "$SCRIPT_SCRUB" || echo "Note: scrub encountered non-fatal issues; continuing"
 else
   echo "WARN: Scrub script not found or not executable. Skipping scrub." >&2
 fi
@@ -40,7 +50,7 @@ fi
 # 4) Push to main using push-prod.sh
 if [ -x "$SCRIPT_PUSH" ]; then
   echo "[Step 4] Pushing to main via token-based authentication..."
-  cd "$WORKSPACE_DIR" && "$SCRIPT_PUSH" || echo "Push script exited with non-zero status (check logs)." 
+  cd "$WORKSPACE_DIR" && "$SCRIPT_PUSH" || echo "Push script exited with non-zero status (check logs)."
 else
   echo "ERROR: push-prod.sh not found or not executable" >&2
   exit 1
@@ -50,7 +60,7 @@ fi
 echo ""
 echo "[Step 5] Deployment verification guidance"
 echo "- If CI/CD is configured with VERCEL_TOKEN, check GitHub Actions Prod Deploy (Vercel) for status and Production URL."
-echo "- If PROD_URL is provided via environment or CI, run: curl -I \"${PROD_URL:-<your-url>}/health\""
+echo "- If PROD_URL is provided, run: curl -I \"\${PROD_URL:-<your-url>}/health\""
 echo "- Optional: run a verify script (run-prod-verify.sh) to automate health checks and webhook tests."
 
 echo ""
