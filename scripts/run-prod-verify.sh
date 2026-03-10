@@ -1,19 +1,22 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Simple prod verify script
-PROC_URL="${PROD_URL:-""}"
-if [ -z "$PROC_URL" ]; then
-  echo "PROD_URL not set. Set PROD_URL to prod production URL as env var or in CI."
+# Quick prod verification script
+PRODUCT_URL="${PROD_URL:-}"
+if [ -z "$PRODUCT_URL" ]; then
+  echo "PROD_URL is not set. Set PROD_URL environment variable or CI output to run verifications." >&2
   exit 0
 fi
 
-echo "Verifying Production URL: $PROC_URL"
+echo "Verifying Production URL: $PRODUCT_URL"
 
 # Health check
-curl -I "$PROC_URL/health" || true
+curl -I "$PRODUCT_URL/health" || true
 
-# Signatures/webhook test placeholder
-echo "Running webhook test placeholder (requires payload and secret)"
+# Simple API check (adjust as needed)
+curl -sS "$PRODUCT_URL" >/dev/null
 
-echo "Verify complete." 
+# Webhook test placeholder (requires real payload and secret in CI)
+echo "Webhook test can be performed with real payload and secret in CI environment."
+
+echo "Verification complete."
